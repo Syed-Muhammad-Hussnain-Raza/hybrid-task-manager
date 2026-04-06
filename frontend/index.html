@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hybrid Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 Hybrid Task Manager</h1>
+            <p>Personal Tasks + Team Collaboration Board</p>
+        </header>
+
+        <!-- Analytics Dashboard -->
+        <div class="analytics">
+            <h2>📊 Analytics Dashboard</h2>
+            <div class="stats-grid">
+                <div class="stat-card personal">
+                    <h3>👤 Personal Tasks</h3>
+                    <p>Total: <span id="personalTotal">0</span></p>
+                    <p>✅ Completed: <span id="personalCompleted">0</span></p>
+                    <p>⏳ Pending: <span id="personalPending">0</span></p>
+                </div>
+                <div class="stat-card team">
+                    <h3>👥 Team Tasks</h3>
+                    <p>Total: <span id="teamTotal">0</span></p>
+                    <p>✅ Completed: <span id="teamCompleted">0</span></p>
+                    <p>⏳ Pending: <span id="teamPending">0</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Sections -->
+        <div class="tasks-container">
+            <!-- Personal Tasks Section -->
+            <div class="task-section">
+                <h2>👤 Personal Tasks</h2>
+                <div class="add-task-form">
+                    <input type="text" id="personalTitle" placeholder="Task title *" required>
+                    <input type="text" id="personalDesc" placeholder="Description (optional)">
+                    <input type="text" id="personalAssigned" placeholder="Assigned to *" required>
+                    <button onclick="addTask('personal')">➕ Add Personal Task</button>
+                </div>
+                <div id="personalTasksList" class="tasks-list"></div>
+            </div>
+
+            <!-- Team Tasks Section -->
+            <div class="task-section">
+                <h2>👥 Team Tasks</h2>
+                <div class="add-task-form">
+                    <input type="text" id="teamTitle" placeholder="Task title *" required>
+                    <input type="text" id="teamDesc" placeholder="Description (optional)">
+                    <input type="text" id="teamAssigned" placeholder="Assigned team *" required>
+                    <button onclick="addTask('team')">➕ Add Team Task</button>
+                </div>
+                <div id="teamTasksList" class="tasks-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
