@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hybrid-task-backend
+  labels:
+    app: hybrid-task-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hybrid-task-backend
+  template:
+    metadata:
+      labels:
+        app: hybrid-task-backend
+    spec:
+      containers:
+      - name: backend
+        image: YOUR_DOCKER_USERNAME/hybrid-task-manager:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: MONGODB_URI
+          value: mongodb://mongodb-service:27017/hybrid-task-manager
+        - name: PORT
+          value: "5000"
