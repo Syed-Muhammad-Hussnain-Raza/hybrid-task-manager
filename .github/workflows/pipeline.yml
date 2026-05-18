@@ -1,0 +1,86 @@
+name: Hybrid Task Manager CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - feature/*
+  workflow_dispatch:
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  BACKEND_IMAGE: hussnainsyed/hybrid-task-manager:backend-latest
+  FRONTEND_IMAGE: hussnainsyed/hybrid-task-manager:frontend-latest
+
+jobs:
+
+# 1. BUILD & BASIC CHECK
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check repository structure
+        run: ls -R
+
+# 2. DOCKER BUILD & PUSH
+  docker:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Backend Image
+        run: docker build -t $BACKEND_IMAGE ./backend
+
+      - name: Build Frontend Image
+        run: docker build -t $FRONTEND_IMAGE ./frontend
+
+      - name: Push Backend Image
+        run: docker push $BACKEND_IMAGE
+
+      - name: Push Frontend Image
+        run: docker push $FRONTEND_IMAGE
+
+# 3. DEPLOY TO AKS
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Get AKS credentials
+        run: |
+          az aks get-credentials \
+            --resource-group hybrid-task-rg \
+            --name hybrid-task-aks \
+            --overwrite-existing
+
+      - name: Deploy Kubernetes manifests
+        run: kubectl apply -f k8s/
+
+      - name: Verify deployment
+        run: |
+          kubectl get pods
+          kubectl get svc
