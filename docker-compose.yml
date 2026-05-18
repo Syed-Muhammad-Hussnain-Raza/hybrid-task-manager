@@ -1,25 +1,59 @@
-version: '3.8'
+version: "3.8"
+
+# Hybrid Task Manager - Full 3-Tier Stack
+# Services: frontend (nginx) + backend (node) + mongodb
 
 services:
+  # MongoDB Database
   mongodb:
     image: mongo:6
     container_name: hybrid-task-mongodb
-    # No port mapping - MongoDB is only accessible inside Docker network
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_DATABASE=hybrid-task-manager
     volumes:
       - mongodb_data:/data/db
-    restart: unless-stopped
+    networks:
+      - hybrid-task-network
 
+  # Node.js Backend API
   backend:
-    build: .
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: hybrid-task-backend
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017/hybrid-task-manager
+      - NODE_ENV=production
       - PORT=5000
+      - MONGODB_URI=mongodb://mongodb:27017/hybrid-task-manager
     depends_on:
       - mongodb
-    restart: unless-stopped
+    networks:
+      - hybrid-task-network
 
+  # Frontend nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hybrid-task-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - hybrid-task-network
+
+# Persistent Volume for MongoDB
 volumes:
   mongodb_data:
+    driver: local
+
+# Shared Network
+networks:
+  hybrid-task-network:
+    driver: bridge
